@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  recorder:
+    build: .
+    container_name: ffmpeg-recorder
+    privileged: true
+    volumes:
+      - ./recordings:/app/recordings
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - /dev/shm:/dev/shm
+      - /run/user/1000/pulse:/tmp/pulse-socket:ro
+      - /var/lib/dbus:/var/lib/dbus:ro
+      - /etc/machine-id:/etc/machine-id:ro
+    devices:
+      - /dev/video0:/dev/video0
+      - /dev/snd:/dev/snd
+    environment:
+      - DISPLAY=${DISPLAY:-:0}
+      - PULSE_SERVER=unix:/tmp/pulse-socket
+      - XDG_RUNTIME_DIR=/run/user/1000
+    network_mode: host
+    stdin_open: true
+    tty: true
