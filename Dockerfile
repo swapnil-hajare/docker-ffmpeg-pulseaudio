@@ -26,11 +26,13 @@ COPY pulse-client.conf /etc/pulse/client.conf
 COPY pulse-server.conf /app/pulse-server.conf
 COPY sample-audio/ /app/sample-audio/
 COPY simple-audio-test.sh /app/simple-audio-test.sh
-RUN chmod +x /app/record-final.sh
-RUN chmod +x /app/pulse-server.conf
-RUN chmod +x /app/simple-audio-test.sh
-RUN chmod +x /app/sample-audio/generate_audio.sh
-RUN chmod +x /app/sample-audio/generate_video.sh
+
+# Fix line endings and permissions for all shell scripts
+RUN sed -i 's/\r$//' /app/record-final.sh && chmod +x /app/record-final.sh
+RUN sed -i 's/\r$//' /app/pulse-server.conf && chmod +x /app/pulse-server.conf
+RUN sed -i 's/\r$//' /app/simple-audio-test.sh && chmod +x /app/simple-audio-test.sh
+RUN sed -i 's/\r$//' /app/sample-audio/generate_audio.sh && chmod +x /app/sample-audio/generate_audio.sh
+RUN sed -i 's/\r$//' /app/sample-audio/generate_video.sh && chmod +x /app/sample-audio/generate_video.sh
 
 RUN chown -R recorder:recorder /app
 

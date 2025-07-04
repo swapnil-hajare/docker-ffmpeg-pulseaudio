@@ -3,7 +3,12 @@
     "allow": [
       "Bash(mkdir:*)",
       "Bash(ffmpeg:*)",
-      "Bash(sox:*)"
+      "Bash(sox:*)",
+      "Bash(ls:*)",
+      "Bash(dos2unix:*)",
+      "Bash(sed:*)",
+      "Bash(docker-compose up:*)",
+      "Bash(find:*)"
     ],
     "deny": []
   }
