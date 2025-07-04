@@ -52,6 +52,14 @@ if [[ ! -e "$VIDEO_SOURCE" ]]; then
     
     sleep 3
     
+    # Start PulseAudio server
+    echo "Starting PulseAudio server..."
+    /app/pulse-server.conf
+    
+    # Generate sample video file with audio
+    echo "Generating sample video file with audio..."
+    /app/sample-audio/generate_video.sh
+    
     AUDIO_CMD=""
     if check_audio_source; then
         AUDIO_CMD="-f $AUDIO_SOURCE -i default -c:a aac -b:a 128k"
@@ -66,6 +74,27 @@ if [[ ! -e "$VIDEO_SOURCE" ]]; then
         fi
     fi
     
+    # Start playing sample video with audio on the X11 display
+    VIDEO_PID=""
+    if [ -f "/app/sample-audio/sample-video.mp4" ]; then
+        echo "Playing sample video with audio on display $DISPLAY..."
+        
+        # Try different audio outputs based on what's available
+        if [ -n "$AUDIO_CMD" ]; then
+            if [ "$AUDIO_SOURCE" = "pulse" ]; then
+                mplayer -display "$DISPLAY" -loop 0 -ao pulse -really-quiet /app/sample-audio/sample-video.mp4 &
+            else
+                mplayer -display "$DISPLAY" -loop 0 -ao alsa -really-quiet /app/sample-audio/sample-video.mp4 &
+            fi
+        else
+            # No audio recording, so just play video
+            mplayer -display "$DISPLAY" -loop 0 -nosound -really-quiet /app/sample-audio/sample-video.mp4 &
+        fi
+        
+        VIDEO_PID=$!
+        sleep 5
+    fi
+    
     if [ -n "$AUDIO_CMD" ]; then
         eval "ffmpeg -f x11grab -video_size \"$RESOLUTION\" -framerate \"$FPS\" -i \"$DISPLAY\" \
                $AUDIO_CMD \
@@ -77,6 +106,11 @@ if [[ ! -e "$VIDEO_SOURCE" ]]; then
                -c:v libx264 -preset medium -crf 23 \
                -t "$DURATION" \
                "$OUTPUT_FILE"
+    fi
+    
+    # Stop video playback
+    if [ -n "$VIDEO_PID" ]; then
+        kill $VIDEO_PID 2>/dev/null
     fi
     
     kill $XVFB_PID

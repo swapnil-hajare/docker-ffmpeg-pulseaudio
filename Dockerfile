@@ -12,6 +12,8 @@ RUN apt-get update && apt-get install -y \
     v4l-utils \
     curl \
     wget \
+    mpg123 \
+    mplayer \
     && rm -rf /var/lib/apt/lists/*
 
 RUN useradd -m -s /bin/bash recorder \
@@ -19,9 +21,16 @@ RUN useradd -m -s /bin/bash recorder \
 
 WORKDIR /app
 
-COPY record.sh /app/record.sh
+COPY record-final.sh /app/record-final.sh
 COPY pulse-client.conf /etc/pulse/client.conf
-RUN chmod +x /app/record.sh
+COPY pulse-server.conf /app/pulse-server.conf
+COPY sample-audio/ /app/sample-audio/
+COPY simple-audio-test.sh /app/simple-audio-test.sh
+RUN chmod +x /app/record-final.sh
+RUN chmod +x /app/pulse-server.conf
+RUN chmod +x /app/simple-audio-test.sh
+RUN chmod +x /app/sample-audio/generate_audio.sh
+RUN chmod +x /app/sample-audio/generate_video.sh
 
 RUN chown -R recorder:recorder /app
 
@@ -29,4 +38,4 @@ USER recorder
 
 RUN mkdir -p /home/recorder/.config/pulse
 
-CMD ["/app/record.sh"]
+CMD ["/app/record-final.sh"]
